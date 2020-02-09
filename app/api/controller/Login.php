@@ -42,4 +42,9 @@ class Login extends BaseController
 
         return show(config('status.error'),'登录失败');
     }
+
+    public function redis() {
+        $redisIDToken = cache(config('redis.id_pre').'3');
+        cache(config('redis.token_pre').$redisIDToken, null);
+    }
 }

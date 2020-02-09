@@ -58,11 +58,8 @@ class User {
             }
             $userId = $user->id;
             $username = $user->username;
-        }
-        $redisIDToken = cache(config('redis.id_pre').$userId);
-        if ($redisIDToken) {
-            throw new \think\Exception("您已经登录，无需再次登录");            
-        }
+        }       
+
 
         $token = Str::getLoginToken($data['phone_number']);
         $redisData = [
@@ -72,6 +69,13 @@ class User {
 
         $res = cache(config('redis.token_pre').$token, $redisData, Time::userLoginExpiresTime($data['type']));
 
+        //检测之前的登录token是否还在，如果还在，删除之前的token
+        $redisIDToken = cache(config('redis.id_pre').$userId);
+        if ($redisIDToken) {
+            cache(config('redis.token_pre').$redisIDToken, null);
+        }
+
+        //生成一个检测redis,用来防止生成一个用户多个token，值为token
         if ($res) {
             cache(config('redis.id_pre').$userId, $token, Time::userLoginExpiresTime($data['type']));
         }
