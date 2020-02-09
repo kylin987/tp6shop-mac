@@ -4,7 +4,7 @@ namespace app\admin\controller;
 
 use app\BaseController;
 use think\facade\View;
-
+use app\common\lib\Str;
 
 class Login extends BaseController
 {
@@ -13,7 +13,7 @@ class Login extends BaseController
     }
 
     public function md5() {
-        $salt = createNonceStr(10);
+        $salt = Str::createRandomStr(10);
         dump($salt);
         echo kMd5("admin",$salt);
     }

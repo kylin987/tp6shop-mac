@@ -9,16 +9,17 @@ use think\Model;
  */
 class User extends Model
 {
-    
-    //根据用户名获取后端表的数据
-    public function getAdminUserByUsername($username)
+    //开启自动添加时间戳
+    protected $autoWriteTimestamp = true;
+    //根据手机号获取用户表的数据
+    public function getUserByPhoneNumber($phone_number)
     {
-        if (empty($username)) {
+        if (empty($phone_number)) {
             return false;
         }
 
         $where = [
-            'username'  => $username,
+            'phone_number'  => $phone_number,
         ];
 
         $result = $this->where($where)->find();

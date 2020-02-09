@@ -10,7 +10,9 @@ return [
     // 错误
     'error'     => 0,
 
-    'captcha_error' => -1001,
+    'captcha_error' => -1001,   //手机验证码错误
+    'datebase_error'    => -2001,   //数据库内部异常
+    'update_error'      => -3001,
 
     'mysql' => [
         'table_normal'  => 1,   //正常
