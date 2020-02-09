@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace app\api\controller;
 
 use app\BaseController;
+use think\facade\Request;
 
 /**
 * 用户登录
@@ -41,10 +42,5 @@ class Login extends BaseController
         }
 
         return show(config('status.error'),'登录失败');
-    }
-
-    public function redis() {
-        $redisIDToken = cache(config('redis.id_pre').'3');
-        cache(config('redis.token_pre').$redisIDToken, null);
     }
 }

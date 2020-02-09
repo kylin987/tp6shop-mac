@@ -5,6 +5,7 @@ namespace app\common\business;
 use app\common\model\mysql\User as UserModel;
 use app\common\lib\Str;
 use app\common\lib\Time;
+use think\facade\Request;
 
 /**
 * 
@@ -69,15 +70,19 @@ class User {
 
         $res = cache(config('redis.token_pre').$token, $redisData, Time::userLoginExpiresTime($data['type']));
 
+        //获取设备的ua，理论上，单设备（浏览器）只给一个token
+        $agent = md5(Request::header('user-agent'));
+        $uaPre = config('redis.id_pre').$agent.'_';
+
         //检测之前的登录token是否还在，如果还在，删除之前的token
-        $redisIDToken = cache(config('redis.id_pre').$userId);
+        $redisIDToken = cache($uaPre.$userId);
         if ($redisIDToken) {
             cache(config('redis.token_pre').$redisIDToken, null);
         }
 
         //生成一个检测redis,用来防止生成一个用户多个token，值为token
         if ($res) {
-            cache(config('redis.id_pre').$userId, $token, Time::userLoginExpiresTime($data['type']));
+            cache($uaPre.$userId, $token, Time::userLoginExpiresTime($data['type']));
         }
 
         return $res ? ['token' => $token, 'username' => $username] : false;
