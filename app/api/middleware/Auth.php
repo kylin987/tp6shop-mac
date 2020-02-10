@@ -22,8 +22,6 @@ class Auth
         if (!$userInfo || empty($userInfo['id']) || empty($userInfo['username'])) {
             return show(config('status.not_login'),'用户信息异常');
         }
-        $request->userId = $userInfo['id'];
-        $request->username = $userInfo['username'];
 
         return $next($request);
     }

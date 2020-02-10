@@ -2,21 +2,20 @@
 
 namespace app\api\controller;
 
-/**
-* 用户相关api
-*/
-class User extends ApiBase
-{
-    protected $middleware = [
-        'auth',
+
+class User extends ApiBase {
+
+    public $middleware = [
+        'auth' => ['except' => ['hello']],
     ];
 
-    public function index(){
-        echo request()->username;
+    public function index() {
+        echo 1;
+        dump($this->userId);
     }
 
     public function hello() {
         echo 'hello';
-        echo request()->username;
+        dump($this->username);
     }
 }
