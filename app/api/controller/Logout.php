@@ -13,17 +13,11 @@ class Logout extends ApiBase
      */
     public function index() {
         //删除redis token的缓存
-        dump($this->accessToken);
-        if ($this->accessToken) {
-            $res = cache(config('redis.token_pre').$this->accessToken, null);
-        }
-        if ($res) {
-            if ($this->userId) {
-                $result = cache(config('redis.id_pre').$this->userId, null);
-            }
-        }
+        $res = cache(config('redis.token_pre').$this->accessToken, null);
 
-        if ($result) {
+        $result = cache(config('redis.id_pre').$this->userId, null);
+
+        if ($res) {
             return show(config('status.success'), "退出登录成功");
         }
 
