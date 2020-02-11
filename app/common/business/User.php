@@ -66,13 +66,15 @@ class User {
         $redisData = [
             'id'    => $userId,
             'username'  => $username,
+            'type'      => $data['type'],
         ];
 
         $res = cache(config('redis.token_pre').$token, $redisData, Time::userLoginExpiresTime($data['type']));
 
         //获取设备的ua，理论上，单设备（浏览器）只给一个token
-        $agent = md5(Request::header('user-agent'));
-        $uaPre = config('redis.id_pre').$agent.'_';
+        //$agent = md5(Request::header('user-agent'));
+        //$uaPre = config('redis.id_pre').$agent.'_';
+        $uaPre = config('redis.id_pre');
 
         //检测之前的登录token是否还在，如果还在，删除之前的token
         $redisIDToken = cache($uaPre.$userId);
@@ -86,5 +88,100 @@ class User {
         }
 
         return $res ? ['token' => $token, 'username' => $username] : false;
+    }
+
+    /**
+     * 根据id返回正常用户的数据
+     * @param $id
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     */
+    public function getNormalUserById($id) {
+        $user = $this->UserObj->getUserById($id);
+        if (!$user || $user->status != config('status.mysql.table_normal')) {
+            return [];
+        }
+        return $user->toArray();
+    }
+
+    /**
+     * 根据用户名返回正常用户信息
+     * @param $username
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     */
+    public function getNormalUserByUsername($username) {
+        $user = $this->UserObj->getUserByUsername($username);
+        if (!$user || $user->status != config('status.mysql.table_normal')) {
+            return [];
+        }
+        return $user->toArray();
+    }
+
+    /**
+     * 更新用户信息
+     * @param $id
+     * @param $data
+     * @return bool
+     * @throws \think\Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     */
+    public function update($id, $data) {
+        $user = $this->getNormalUserById($id);
+        if (!$user) {
+            throw new \think\Exception("不存在该用户");
+        }
+        if ($user['username'] == $data['username'] && $user['sex'] == $data['sex']) {
+            return true;
+        }
+
+        //如果已经修改了用户名
+        if($user['is_edit_username']) {
+            if ($data['username'] != $user['username']){
+                throw new \think\Exception("用户名不可更改");
+            }
+        } else {
+            if ($user['username'] != $data['username']) {
+                $res = $this->getNormalUserByUsername($data['username']);
+                if ($res) {
+                    throw new \think\Exception("该用户名已存在");
+                }
+                $data['is_edit_username'] = 1;
+            }
+        }
+
+        return $this->UserObj->updateById($id, $data);
+    }
+
+    /**
+     * 修改token里的数据
+     * @param $token
+     * @param $username
+     * @return mixed
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     */
+    public function updateRedisDate($token, $username) {
+        $userInfo = cache(config('redis.token_pre').$token);
+        if ($userInfo['username'] !== $username) {
+            $user = $this->getNormalUserById($userInfo['id']);
+            $redisData = [
+                'id'    => $userInfo['id'],
+                'username'  => $user['username'],
+                'type'      => $userInfo['type'],
+            ];
+            //计算redis缓存剩余时间
+            $surplusTime =Time::userLoginExpiresTime($userInfo['type']) - (intval(time()) - intval($user['last_login_time']));
+
+            //修改缓存的数据
+            return cache(config('redis.token_pre').$token, $redisData, $surplusTime);
+        }
     }
 }

@@ -26,6 +26,40 @@ class User extends Model
         return $result;
     }
 
+    /**
+     * 根据id获取用户信息
+     * @param $id
+     * @return array|bool|Model|null
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     */
+    public function getUserById($id) {
+        $id = intval($id);
+        if (!$id) {
+            return false;
+        }
+        return $this->find($id);
+    }
+
+    /**
+     * 根据用户名获取用户信息
+     * @param $username
+     * @return array|bool|Model|null
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     */
+    public function getUserByUsername($username) {
+        if (empty($username)) {
+            return false;
+        }
+        $where = [
+            'username'  => $username,
+        ];
+        return $this->where($where)->find();
+    }
+
     //根据主键id更新数据表中的数据
     public function updateById($id, $data) {
         $id = intval($id);

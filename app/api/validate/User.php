@@ -16,6 +16,7 @@ class User extends Validate
         'code'  => 'require|number|min:4',
         'type'  => 'require|in:1,2',
         //'type'  => ['require', 'in'=> '1,2'], //和上面一样
+        'sex'   => 'require|in:0,1,2',
     ];
 
     protected $message = [
@@ -27,10 +28,13 @@ class User extends Validate
         'code.min'      => '验证码至少4位',
         'type.require'  => '类型必须',
         'type.in'       => '类型数值异常',
+        'sex.require'   => '性别必须',
+        'sex.in'        => '性别异常',
     ];
 
     protected $scene = [
         'send_code' => ['phone_number'],
-        'login'     => ['phone_number','code','type'],
+        'login'     => ['phone_number', 'code', 'type'],
+        'update_user'   => ['username', 'sex'],
     ];
 }
