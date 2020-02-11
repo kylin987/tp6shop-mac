@@ -20,7 +20,7 @@ class Auth
         }
         $userInfo = cache(config('redis.token_pre').$accessToken);
         if (!$userInfo || empty($userInfo['id']) || empty($userInfo['username'])) {
-            return show(config('status.not_login'),'用户信息异常');
+            return show(config('status.not_login'),'未登录');
         }
 
         return $next($request);
