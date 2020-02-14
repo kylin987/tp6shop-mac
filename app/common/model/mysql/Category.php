@@ -34,7 +34,7 @@ class Category extends Model
     }
 
     /**
-     * 获取栏目信息
+     * 获取所有栏目信息
      * @param string $field
      * @return \think\Collection
      * @throws \think\db\exception\DataNotFoundException
@@ -48,4 +48,17 @@ class Category extends Model
 
         return $this->where($where)->field($field)->select();
     }
+
+    public function getLists($where, $num) {
+        $order = [
+            "listorder" => "desc",
+            "id"        => "asc",
+        ];
+        $result = $this->where("status", "<>", config('status.mysql.table_delete'))
+            ->where($where)
+            ->order($order)
+            ->paginate($num);
+        return $result;
+    }
+
 }
