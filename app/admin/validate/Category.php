@@ -30,6 +30,7 @@ class Category extends Validate
 
     protected $scene = [
         'add'   => ['pid','name'],
+        'edit'   => ['id','pid','name'],
         'changeListOrder'   => ['id','listorder'],
         'changeStatus'      => ['id', 'status'],
     ];

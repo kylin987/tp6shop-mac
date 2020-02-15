@@ -49,30 +49,63 @@ class Category extends BaseController
     }
 
     /**
-     * 新增栏目保存
+     * 新增/编辑栏目保存
      * @return \think\response\Json
      */
     public function save() {
         $pid = input("param.pid", 0, "intval");
         $name = input("param.name", "", "trim");
+        $id = input("param.editId", "", "intval");
 
         $data = [
             'pid'   => $pid,
             'name'  => $name,
         ];
 
-        $validate = (new \app\admin\validate\Category())->scene('add');
+        $scene = 'add';
+
+        if ($id) {
+            $data['id'] = $id;
+            $scene = 'edit';
+        }
+
+        $validate = (new \app\admin\validate\Category())->scene($scene);
         if (!$validate->check($data)) {
             return show(config('status.error'), $validate->getError());
         }
 
         try {
-            $result = (new CategoryBis())->add($data);
+            if ($id){
+                $result = (new CategoryBis())->edit($data);
+            } else {
+                $result = (new CategoryBis())->add($data);
+            }
+
         } catch (\Exception $e) {
             return show(config('status.error'), $e->getMessage());
         }
 
         return show(config('status.success'), "ok", $result);
+    }
+
+    public function edit() {
+        $id = input("param.id", 0, "intval");
+        if (empty($id)) {
+            return show(config('status.error'), "栏目id不存在");
+        }
+
+        $info = (new CategoryBis())->getInfoById($id);
+
+        try {
+            $categorys = (new CategoryBis())->getNormalCategorys();
+        } catch (\Exception $e) {
+            $categorys = [];
+        }
+
+        return View::fetch("",[
+            'info'  => $info,
+            'categorys' => json_encode($categorys),
+        ]);
     }
 
     /**

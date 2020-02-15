@@ -36,6 +36,38 @@ class Category {
         return $this->model->id;
     }
 
+
+    /**
+     * 修改栏目信息
+     * @param $data
+     * @return bool
+     * @throws \think\Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     */
+    public function edit($data) {
+        $res = $this->model->getCategoryByName($data['name']);
+        /**
+        1、不修改名字，那么获得的是本栏目信息，允许修改
+        2、修改为一个未用的名字，那么res为空，允许修改
+        3、修改为一个已存在的，并且为别的栏目的名字，那么获得的是别的栏目信息，不允许修改
+        */
+        //如果为3
+        if ($res && $res['id'] != $data['id']) {
+            throw new \think\Exception("分类名已存在");
+        }
+
+
+        try {
+            $result = $this->updateCategory($data);
+        } catch (\Exception $e) {
+            throwE($e, config('status.error'), "服务内部异常");
+        }
+
+        return $result;
+    }
+
     /**
      * 获取所有普通栏目信息
      * @return array
@@ -121,5 +153,17 @@ class Category {
         }
         return $result;
 
+    }
+
+    public function getInfoById($id) {
+        if (empty($id)) {
+            throw new \think\Exception("id参数错误");
+        }
+        $category = $this->model->find($id);
+        if (empty($category)) {
+            throw new \think\Exception("不存在该记录");
+        }
+
+        return $category->toArray();
     }
 }
