@@ -37,7 +37,7 @@
                 <colgroup>
                     <col width="40">
                     <col width="120">
-                    <col width="100">
+                    <col width="70">
                     <col width="130">
                     <col width="130">
                     <col width="70">
@@ -82,16 +82,16 @@
                     </td>
 
 
-                    <td data-id="1"><input type="checkbox" {if $vo.status == 1}checked{/if} name="status" lay-skin="switch"
-                                           lay-filter="switchTest"
+                    <td data-id="{$vo.id}"><input type="checkbox" {if $vo.status == 1}checked{/if} name="status" lay-skin="switch"
+                                           lay-filter="switchStatus"
                                            lay-text="ON|OFF">
                     </td>
 
 
                     <td>
-                        <a class="layui-btn layui-btn-xs layui-btn-danger data-count-delete del-child" data-ptype="1"
+                        <a class="layui-btn layui-btn-xs layui-btn-danger data-count-delete delete" data-ptype="1"
                            lay-event="delete" data-id="{$vo.id}">删除</a>
-                        <a class="layui-btn layui-btn-xs layui-btn-normal" href="{:url('index',['pid'=>$vo.id])}">获取子栏目</a>
+                        <a class="layui-btn layui-btn-xs layui-btn-normal" href="{:url('index',['pid'=>$vo.id])}">子栏目({$vo.childCount})</a>
                     </td>
                 </tr>
                 {/volist}
@@ -121,7 +121,7 @@
             , jump: function(obj, first){
                 //首次不执行
                 if(!first){
-                    location.href="?page="+obj.curr
+                    location.href="?pid={$pid}&page="+obj.curr
                 }
             }
         });
@@ -133,15 +133,18 @@
         });
 
         //监听状态 更改
-        form.on('switch(switchTest)', function (obj) {
-            console.log(obj.elem.checked, '改变状态')
-
+        form.on('switch(switchStatus)', function (obj) {
             let id = obj.othis.parent().attr('data-id');
             let status = obj.elem.checked ? 1 : 0;
             $.ajax({
-                url: '{:url("admin/change")}?id=' + id + '&status=' + status,
+                url: '{:url("changeStatus")}?id=' + id + '&status=' + status,
                 success: (res) => {
-
+                    if (res.status == 1) {
+                        //window.location.reload();
+                        layer.msg("修改成功")
+                    }else {
+                        layer.msg("修改失败");
+                    }
                 }
             });
             return false;
@@ -173,19 +176,20 @@
         }
 
         // 删除二级分类
-        $('.del-child').on('click', function () {
+        $('.delete').on('click', function () {
             let ptype = $(this).attr('data-ptype'); // fu
             let id = $(this).attr('data-id'); // fu
             let msg = '';
-            if (ptype == 1) { // 等级类目
-                msg = '一';
-            } else if (ptype == 2) {
-                msg = '二';
-            }
-            layObj.box(`是否删除${msg}级分类`, () => {
-                let   url = '{:url("admin/del")}?id=' + id
+
+            layObj.box(`是否删除该分类`, () => {
+                let   url = '{:url("changeStatus")}?id=' + id + '&status=99'
                 layObj.get(url,  (res) =>{
-                    $(this).parent().remove()
+                    if (res.status == 1) {
+                        layer.msg("删除成功");
+                        window.location.reload();
+                    }else {
+                        layer.msg("删除失败");
+                    }
                 })
 
             })

@@ -15,6 +15,7 @@ class Category extends Validate
         'name'  => 'require',
         'id'    => 'require|number',
         'listorder' => 'require|integer',
+        'status'    => 'require|integer',
     ];
 
     protected $message = [
@@ -23,10 +24,13 @@ class Category extends Validate
         'id'    => 'id异常',
         'listorder.require' => '排序必须填写',
         'listorder.integer' => '排序必须为整数',
+        'status.require' => '状态必须填写',
+        'status.integer' => '状态必须为整数',
     ];
 
     protected $scene = [
         'add'   => ['pid','name'],
         'changeListOrder'   => ['id','listorder'],
+        'changeStatus'      => ['id', 'status'],
     ];
 }

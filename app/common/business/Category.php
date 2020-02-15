@@ -37,7 +37,7 @@ class Category {
     }
 
     /**
-     * 获取栏目信息
+     * 获取所有普通栏目信息
      * @return array
      * @throws \think\db\exception\DataNotFoundException
      * @throws \think\db\exception\DbException
@@ -54,10 +54,11 @@ class Category {
     }
 
     /**
-     * 获取栏目数据
+     * 获取栏目列表信息
      * @param $data
      * @param $num
      * @return array
+     * @throws \think\db\exception\DbException
      */
     public function getLists($data, $num) {
         $list = $this->model->getLists($data, $num);
@@ -65,11 +66,36 @@ class Category {
             return [];
         }
 
-        return $list->toArray();
+        $result = $list->toArray();
+        $result['render'] = $list->render();
+        /**
+         * 获取每个栏目下级栏目的数量的思路
+         * 1、拿到当前获取的列表中的id，也就是他们下级栏目的pid
+         * 2、in mysql 求count
+         * 3、把count填充到列表中
+         */
+        $pids = array_column($result['data'], "id");
+        $idCountResult = ($this->model->getChildCountInPids($pids))->toArray();
+        if ($idCountResult) {
+            $idCounts = [];
+            foreach ($idCountResult as $countResult) {
+                $idCounts[$countResult['pid']] = $countResult['count'];
+            }
+
+            foreach ($result['data'] as $k=>$v){
+                $result['data'][$k]['childCount'] = $idCounts[$v['id']] ?? 0;
+            }
+        } else {
+            foreach ($result['data'] as $k=>$v){
+                $result['data'][$k]['childCount'] = 0;
+            }
+        }
+
+        return $result;
     }
 
     /**
-     * 更新栏目排序
+     * 更新栏目信息
      * @param $data
      * @return bool
      * @throws \think\Exception
@@ -77,7 +103,7 @@ class Category {
      * @throws \think\db\exception\DbException
      * @throws \think\db\exception\ModelNotFoundException
      */
-    public function listorder($data) {
+    public function updateCategory($data) {
         if (empty($data['id'])) {
             throw new \think\Exception("栏目id异常");
         }
@@ -87,7 +113,6 @@ class Category {
         }
 
         $data['update_time'] = time();
-
 
         try {
             $result = $category->save($data);

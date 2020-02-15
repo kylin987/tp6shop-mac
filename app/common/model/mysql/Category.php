@@ -49,6 +49,13 @@ class Category extends Model
         return $this->where($where)->field($field)->select();
     }
 
+    /**
+     * 获取栏目列表
+     * @param $where
+     * @param $num
+     * @return \think\Paginator
+     * @throws \think\db\exception\DbException
+     */
     public function getLists($where, $num) {
         $order = [
             "listorder" => "desc",
@@ -60,5 +67,23 @@ class Category extends Model
             ->paginate($num);
         return $result;
     }
+
+    /**
+     * 获取下级栏目数量
+     * @param $pids
+     * @return mixed
+     */
+    public function getChildCountInPids($pids) {
+        $where[] = ["pid", "in", $pids];
+        $where[] = ["status", "<>", config('status.mysql.table_delete')];
+
+        $res = $this->where($where)
+            ->field(["pid", "count(*) as count"])
+            ->group("pid")
+            ->select();
+        //halt($this->getLastSql());
+        return $res;
+    }
+
 
 }

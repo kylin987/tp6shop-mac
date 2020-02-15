@@ -24,7 +24,9 @@ class Category extends BaseController
         } catch (\Exception $e) {
             $categorys = [];
         }
+
         View::assign('categorys',$categorys);
+        View::assign('pid', $pid);
 
         return View::fetch();
     }
@@ -91,7 +93,7 @@ class Category extends BaseController
             return show(config('status.error'), $validate->getError());
         }
         try {
-            $resule = (new CategoryBis())->listorder($data);
+            $resule = (new CategoryBis())->updateCategory($data);
         } catch (\Exception $e) {
             return show(config('status.error'), $e->getMessage());
         }
@@ -101,5 +103,35 @@ class Category extends BaseController
         }
         return show(config('status.error'), "排序失败");
 
+    }
+
+    public function changeStatus(){
+        $id = input("param.id", 0, "intval");
+        $status = input("param.status", 0, "intval");
+
+        $data = [
+            'id'    => $id,
+            'status' => $status,
+        ];
+
+        $validate = (new \app\admin\validate\Category())->scene('changeStatus');
+        if (!$validate->check($data)) {
+            return show(config('status.error'), $validate->getError());
+        }
+
+        if (!in_array($status, \app\common\lib\Status::getTableStatus())) {
+            return show(config('status.error'), "参数错误");
+        }
+
+        try {
+            $resule = (new CategoryBis())->updateCategory($data);
+        } catch (\Exception $e) {
+            return show(config('status.error'), $e->getMessage());
+        }
+
+        if ($resule) {
+            return show(config('status.success'), "更新成功", $resule);
+        }
+        return show(config('status.error'), "更新失败");
     }
 }
