@@ -19,14 +19,19 @@ class Category extends BaseController
             'pid'   => $pid,
         ];
 
+        $CategoryBis = new CategoryBis();
         try {
-            $categorys = (new CategoryBis())->getLists($data, 5);
+            $categorys = $CategoryBis->getLists($data, 5);
         } catch (\Exception $e) {
             $categorys = [];
         }
 
+        //获取面包屑导航
+        $breadTree = $CategoryBis->getBreadNav($pid);
+
         View::assign('categorys',$categorys);
         View::assign('pid', $pid);
+        View::assign('breadTree', $breadTree);
 
         return View::fetch();
     }

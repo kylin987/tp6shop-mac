@@ -85,5 +85,23 @@ class Category extends Model
         return $res;
     }
 
+    /**
+     * 根据id获取栏目相关字段信息
+     * @param $id
+     * @param string $field
+     * @param bool $isAll
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     */
+    public function getFieldById($id, $field = "*", $isAll = false) {
+        $where = [];
+        if (!$isAll) {
+            $where[] = ["status", "<>", config('status.mysql.table_delete')];
+        }
+        $res = $this->where($where)->field($field)->find($id);
+        return $res->toArray();
+    }
 
 }

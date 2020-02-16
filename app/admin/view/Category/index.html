@@ -30,6 +30,15 @@
 <body>
 <div class="layuimini-container">
     <div class="layuimini-main">
+        <div class="bread">您的位置：<span class="layui-breadcrumb">
+            {volist name="breadTree" id="vo"}
+                {if $pid != $vo.id}
+                    <a href="{:url('index',['pid'=>$vo.id])}">{$vo.name}</a>
+                {else /}
+                    <a><cite>{$vo.name}</cite></a>
+                {/if}
+            {/volist}
+        </span></div>
         <button type="button" class="layui-btn add">添 加</button>
 
         <div class="layui-form" style="margin-top: 20px;">
@@ -104,12 +113,16 @@
     </div>
 
 </div>
+<style>
+    .bread {line-height: 35px; text-indent: 2px;}
+</style>
 <script src="{__STATIC_PATH}/admin/lib/jquery-3.4.1/jquery-3.4.1.min.js"></script>
 <script src="{__STATIC_PATH}/admin/lib/layui-v2.5.4/layui.js" charset="utf-8"></script>
 <script src="{__STATIC_PATH}/admin/js/common.js?v5" charset="utf-8"></script>
 <!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
 <script>
-    layui.use(['form', 'laypage'], function () {
+    layui.use(['form', 'laypage','element'], function () {
+        var element = layui.element;
         var form = layui.form
             , laypage = layui.laypage;
 
