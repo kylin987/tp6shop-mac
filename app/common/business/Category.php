@@ -173,7 +173,7 @@ class Category {
             throw new \think\Exception("不存在该记录");
         }
 
-        return $category->toArray();
+        return $category();
     }
 
     /**
